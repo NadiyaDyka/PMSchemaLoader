@@ -1,3 +1,4 @@
+const Ajv = require('ajv');
 /**
  * Main idea: download from GitHub JSON-schemas and subschemas
  * (if we haven't got them in sources yet) and when we get all needs schemas,
@@ -39,20 +40,22 @@ class PMSchemaLoader {
      * storege for schema sources
      */
     sources = {};
-
+    LockFlag = {};
     constructor(descr, host) {
         this.descr = descr;
         this.host = host;
     }
 
     getSchema(schema_name) {
-        var subschemas = this.load(schema_name);
-        console.log(`getSchema: befor nae Ajv`);
+        let subschemas = this.load(schema_name);
+        console.log(subschemas);
+        this.LockFlag = {};
+        console.log(`getSchema: befor new Ajv`);
         let ajv = new Ajv({ logger: console, allErrors: true, verbose: true });
-        console.log(`getSchema: after nae Ajv`);
-        for (key in subschemas) {
-            subschema_name = subschemas[key];
-            console.log(subschema_name);
+        console.log(`getSchema: after new Ajv`);
+        for (let key in subschemas) {
+            let subschema_name = subschemas[key];
+            console.log(`Add subschema: ${subschema_name}`);
             console.log(this.sources[subschema_name]);
             ajv.addSchema(this.sources[subschema_name], key);
         }
@@ -78,7 +81,7 @@ class PMSchemaLoader {
         if (!this.descr['schemas'][schema_name]) {
             throw new Error(`Can't find the schema ${schema_name} in descriptor.`)
         }
-        this.loadItem(schema_name);
+        let succses = this.loadItem(schema_name);
 
         var subschemas = {};
         if (this.descr['schemas'][schema_name]['include']) {
@@ -112,8 +115,18 @@ class PMSchemaLoader {
 
         if (!this.sources[schema_name]) {
             console.log(`loadItem: Before _loadItem ${schema_name}`)
-            this.sources[schema_name] = await this._loadItem(this.getSchemaRequestParameters(schema_name));
-            console.log(`loadItem: After _loadItem ${schema_name}`)
+            if (!this.LockFlag[schema_name]) {
+                this.LockFlag[schema_name] = 1;
+                //here i need to check that this._loadItem return resolve result (not error)
+                // if this._loadItem return result than res=this.sources[schema_name]
+                this.sources[schema_name] = await this._loadItem(this.getSchemaRequestParameters(schema_name));
+                console.log(`loadItem: After _loadItem ${schema_name}`);
+            } else {
+                console.log(`loadItem: schema already locked ${schema_name}`);
+            }
+
+        } else {
+            console.log(`loadItem: schema already loaded ${schema_name}`);
         }
         return true;
     }
@@ -128,7 +141,7 @@ class PMSchemaLoader {
     _loadItem(requestParameters) {
             /*function sendRequest(req) {*/
             return new Promise((resolve, reject) => {
-                console.log("_loadItem");
+                // console.log("_loadItem");
                 pm.sendRequest(requestParameters, (err, res) => {
                     if (err) {
                         return reject(err);
@@ -167,7 +180,7 @@ class PMSchemaLoader {
             'Authorization': 'token 4ac77666d4a0013f7cb791d0319d412a59653db6'
         };
         // return url;
-        console.log(requestParameters);
+        //console.log(requestParameters);
         return requestParameters;
 
     }
@@ -176,7 +189,7 @@ class PMSchemaLoader {
 const sl = new PMSchemaLoader(descr, "https://github.com/NadiyaDyka/AffRegAPIDoc");
 
 try {
-    let x = sl.load("get_lang_schema");
+    let x = sl.getSchema("get_lang_schema");
     //console.log("See X on next row");
     console.log(x);
 } catch (ex) {

@@ -145,12 +145,13 @@ class PMSchemaLoadManager {
         }
         try {
             
-        const schemaValidator = ajv.compile(JSON.parse(this.sources[SchemaName]));
+            const schemaValidator = ajv.compile(JSON.parse(this.sources[SchemaName]));
             console.log("I compile schema!");
+            return schemaValidator;
         } catch (e) {
             console.log(e.message);
         }
-        return schemaValidator;
+       
     }
 
 

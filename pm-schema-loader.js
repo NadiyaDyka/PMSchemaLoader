@@ -5,7 +5,7 @@ module.exports = class PMSchemaLoadManager {
     /**
      * storege for schema sources
      */
-    static sources = {};
+    sources = {};
     descr = require('./dataset.js');
 
     constructor(descr, host) {
@@ -39,11 +39,10 @@ module.exports = class PMSchemaLoadManager {
              *  the code below (metod and header) need to change to use Postman's constants 
              *  or change to transfer header as parameter of class?
              */
-            requestParameters.method = "GET";
-            requestParameters.header = {
-                'Accept': 'application/vnd.github.VERSION.raw',
-                'Authorization': 'token 4ac77666d4a0013f7cb791d0319d412a59653db6'
-            };            
+            requestParameters.method = "GET";           
+            requestParameters.header = {};
+            requestParameters.header.Accept = 'application/vnd.github.VERSION.raw';      
+            requestParameters.header.Authorization = 'token 4ac77666d4a0013f7cb791d0319d412a59653db6'; 
             if (this._debugMode) {
                 console.log(requestParameters);
             }
@@ -194,7 +193,7 @@ module.exports = class PMSchemaLoadManager {
     processLoad(Key, Schema) {
         if (this._debugMode) {
             console.log(`We are into processLoad and then see SchemaJSON`);
-            console.log(JSON.stringify(Schema.json()));
+           // console.log(JSON.stringify(Schema.json()));
             console.log(this.sources[Schema]);
         }; 
         let SchemaJSON=JSON.stringify(Schema.json());

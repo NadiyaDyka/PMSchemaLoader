@@ -1,7 +1,9 @@
 //module.exports = 
 
-//const Ajv = require('ajv');
-PMSchemaLoadManager = class PMSchemaLoadManager {
+/**
+ * 
+ */
+class PMSchemaLoadManager {
     /**
      *An object describing the relationships of schemas and subschemas
      */
@@ -29,6 +31,7 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
     host;
     /**
      * vriable for change testing mode
+     * toggles the mode of displaying/not displaying debug messages
      */
     _debugMode = false;
 
@@ -36,11 +39,11 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
      * storege for schema sources
      */
     sources = {};
-/**
- * The constructor processes an object - a complete set of parameters for a request
- * or a string - a path for downloading a descriptor (for the simplest case, when link enought for download)
- * @param {object or string} initParamPMSchemaLoadManager 
- */
+    /**
+     * The constructor processes an object - a complete set of parameters for a request
+     * or a string - a path for downloading a descriptor (for the simplest case, when link enought for download)
+     * @param {object or string} initParamPMSchemaLoadManager 
+     */
     constructor(initParamPMSchemaLoadManager) {
        
        if (typeof initParamPMSchemaLoadManager ==="string"){
@@ -71,10 +74,10 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
             throw new Error(`Invalid initParamPMSchemaLoadManager. It need to be an object or a string`);
        };                   
     }     
-/**
- * functions are described below - getters and setters for variables
- * _debugMode, descr and host
- */
+    /**
+     * functions are described below - getters and setters for variables
+     * _debugMode, descr and host
+     */
     getDebugMode() {
         return this._debugMode;
       }
@@ -101,10 +104,10 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
         this.host = newHost;   
         return true;        
     }
-/**
- *This function composes request parameters for downloading the descriptor 
- * @param {object} headerForDescriptorRequestParameters 
- */
+    /**
+     *This function composes request parameters for downloading the descriptor 
+    * @param {object} headerForDescriptorRequestParameters 
+    */
     getDescriptorRequestParameters(headerForDescriptorRequestParameters){
        
         if (this.descriptorRequestParameters["method"] === ""){          
@@ -121,7 +124,7 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
     }
 
     /**
-     * Function forms a string with the url and
+     * Function composes a string with the url and
      * than create object with request parameters 
      * @param {string} SchemaName Name of Schema
      * @throws Exception if any error
@@ -155,7 +158,6 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
      *This is a generator function. It does not form the array in advance, but
      *transfers control to the outside as soon as it receives the first element.
      *A client with this function can work like this:
-     *
      *async function(){
      *  try {
      *    foreach( var scheme in GSM.getSchemasToLoadFor(SchemaName) ) { // *1
@@ -246,7 +248,6 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
        
     }
 
-
     /**
      * manages the loading of the main schema and subschemas, 
      * generates a list of subschemas
@@ -281,7 +282,6 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
         };
         return subschemas;
     }
-
 
     /**
      * Analitic function for download schema.
@@ -359,5 +359,8 @@ let initParamPMSchemaLoadManager = {
  * Set the value of the variable to pass the parameter when initializing the class
  */ 
 //let initParamPMSchemaLoadManager = "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json" 
-    
+ /**
+  * initialize the class as SingleTone
+  * to save all downloaded schemes in it and not download them again
+  *  */   
 sl = new PMSchemaLoadManager(initParamPMSchemaLoadManager);

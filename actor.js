@@ -29,13 +29,33 @@ function sendRequest(req) {
 }
 var descr = require('./dataset.js');
 var PMSchemaLoadManager = require('./pm-schema-loader.js');
-const sl = new PMSchemaLoadManager(descr, "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents");
+//const sl = new PMSchemaLoadManager(descr, "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents");
+let initParamPMSchemaLoadManager = {
+    "url":"https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json", 
+    "method":"GET", 
+    "header":{
+        "Accept":"application/vnd.github.VERSION.raw",
+        "Authorization":"token 4ac77666d4a0013f7cb791d0319d412a59653db6"
+    }
+};
+//const sl = new PMSchemaLoadManager(descr);
 
-async function wrapper() {
+
+async function wrapperFirst() {
+     try {
+
+        sl.descriptorValue = sl.processDescriptorLoad(await sendRequest(sl.getDescriptorRequestParameters()));               
+        console.log( sl.descriptorValue);
+    } catch (ex) {
+        console.log(`Can't got descriptor: name: ${ex.name}; message: ${ex.message}`);       
+       
+    };
+}    
+async function wrapperSecond() {
     try {
         for (var schema of sl.getSchemasToLoadFor("get_lang_schema")) {  
 
-            console.log(`генератор выдал название схемы ${schema}`);          
+            console.log(`The generator has identified the schema name ${schema}`);          
             sl.processLoad(schema, await sendRequest(sl.getSchemaRequestParameters(schema)));
         }
       //  ajv = sl.addSchemaToAjv("get_lang_schema");        
@@ -45,5 +65,8 @@ async function wrapper() {
         clearInterval(_dummy)
     }
 }
+const sl = new PMSchemaLoadManager(initParamPMSchemaLoadManager);
 sl.debugModeValue = true;
-wrapper();
+
+wrapperFirst();
+//wrapperSecond();

@@ -217,24 +217,23 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
             let subSchemaName = subschemas[key];
             if (this._debugMode) {
                 console.log(`Add subschema to ajv: ${subSchemaName}`);
-                console.log(JSON.parse(this.sources[subSchemaName]));
-            };
-            ajv.addSchema(JSON.parse(this.sources[subSchemaName]), key);
+                console.log(this.sources[subSchemaName]);
+            };            
+            ajv.addSchema(this.sources[subSchemaName], key);
             if (this._debugMode) {
-                console.log(`key ${key}`);
-                console.log(JSON.parse(this.sources[SchemaName]));
+                console.log(`key ${key}`);              
+                console.log(this.sources[SchemaName]);
             };
-        }
-        try {
-            
-            const schemaValidator = ajv.compile(JSON.parse(this.sources[SchemaName]));
+        };
+        try {       
+            const schemaValidator = ajv.compile(this.sources[SchemaName]);
             if (this._debugMode) {
                 console.log("I compile schema!");
             };
             return schemaValidator;
         } catch (e) {
             console.log(e.message);
-        }
+        };
        
     }
 
@@ -286,11 +285,11 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
     processLoad(Key, Schema) {
         if (this._debugMode) {
             console.log(`We are into processLoad and then see SchemaJSON`);
-           // console.log(JSON.stringify(Schema.json()));
+            console.log(Schema.json());
             console.log(this.sources[Schema]);
         }; 
-        let SchemaJSON=JSON.stringify(Schema.json());
-        //let SchemaJSON=Schema.json();
+       
+        let SchemaJSON=Schema.json();
         if (this._debugMode) {
             console.log(Key);
         };    
@@ -306,13 +305,12 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
                 this.sources[Key] = SchemaJSON;
                 if (this._debugMode) {
                  console.log(this.sources[Schema]);
-                }
-            }            
+                };
+            };            
         }
         if (this._debugMode) {
             console.log(`Befor the exit of processLoad`);
-        }
-        
+        };        
         return true;
     }
 
@@ -320,10 +318,7 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
         if (this._debugMode) {
             console.log(`We are into processDecriptorLoad and below can see descr`);
             console.log(rowDescriptor.json());           
-        }; 
-        //let DescrJSON=JSON.stringify(rowDescriptor.json());
-        //this.descr = rowDescriptor.json();
-        //this.host = this.descr["host"];
+        };        
         this.setDescriptor(rowDescriptor.json());       
         this.setHost(this.descr["host"]);
         if (this._debugMode) {

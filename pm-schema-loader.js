@@ -36,7 +36,11 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
      * storege for schema sources
      */
     sources = {};
-    //descr = require('./dataset.js');
+/**
+ * The constructor processes an object - a complete set of parameters for a request
+ * or a string - a path for downloading a descriptor (for the simplest case, when link enought for download)
+ * @param {object or string} initParamPMSchemaLoadManager 
+ */
     constructor(initParamPMSchemaLoadManager) {
        
        if (typeof initParamPMSchemaLoadManager ==="string"){
@@ -67,7 +71,10 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
             throw new Error(`Invalid initParamPMSchemaLoadManager. It need to be an object or a string`);
        };                   
     }     
-
+/**
+ * functions are described below - getters and setters for variables
+ * _debugMode, descr and host
+ */
     getDebugMode() {
         return this._debugMode;
       }
@@ -94,7 +101,10 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
         this.host = newHost;   
         return true;        
     }
-
+/**
+ *This function composes request parameters for downloading the descriptor 
+ * @param {object} headerForDescriptorRequestParameters 
+ */
     getDescriptorRequestParameters(headerForDescriptorRequestParameters){
        
         if (this.descriptorRequestParameters["method"] === ""){          
@@ -126,10 +136,7 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
             let url = this.host + this.descr["schemas"][SchemaName]["path"];
             requestParameters.url = url;
             requestParameters.method = "GET";
-            /**
-             *  the code below (header) need to change to use Postman's constants 
-             *  or change to transfer header as parameter of class?
-             */ 
+           
             if ( headerForSchemaRequestParameters ) {                      
                 requestParameters.header = headerForSchemaRequestParameters;
             };
@@ -139,25 +146,27 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
             return requestParameters;        
     }
 
-        /**
-         * manages the generating list of schemas to load from host      
-         * @param {string} SchemaName
-         * @throws Exception if any error
-         * @returns {object}
-        /*
-        это функция-генератор. Она не собирает список, а как только нашла нужный элемент
-        передает его дальше в работу. 
-        Клиенту с этой функцией нужно работать так:
-        async function(){
-          try {
-            foreach( var scheme in GSM.getSchemasToLoadFor(SchemaName) ) { // *1
-              GSM.processLoad( await sendRequest( GSM.getSchemaRequestParameters(scheme) ) );
-            }
-            ajv = GSM.getAJV( SchemaName );
-          }
-          catch(...)
-        }();
-        */
+    /**
+     * manages the generating list of schemas to load from host      
+     * @param {string} SchemaName
+     * @throws Exception if any error
+     * @returns {object}
+     *
+     *This is a generator function. It does not form the array in advance, but
+     *transfers control to the outside as soon as it receives the first element.
+     *A client with this function can work like this:
+     *
+     *async function(){
+     *  try {
+     *    foreach( var scheme in GSM.getSchemasToLoadFor(SchemaName) ) { // *1
+     *      GSM.processLoad( await sendRequest( GSM.getSchemaRequestParameters(scheme) ) );
+     *    }
+     *   ajv = GSM.getAJV( SchemaName );
+     *  }
+     * catch(...){
+     * 
+     * }();
+     */
 
     * getSchemasToLoadFor(SchemaName, excludeList = {}) {
          if (this._debugMode) {
@@ -257,9 +266,9 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
 
                 for (let id in this.descr['schemas'][SchemaName]['include']) {
 
-                    /* Attention! This function returns only subschemas, it mean that "main" schema (SchemaName) not
-                    be include to list, so we need add it "manually"*/
-
+                   /** Attention! This function returns only subschemas, it mean that "main" schema (SchemaName) not
+                    *   be include to list, so we need add it "manually"
+                    */
                     subschemas[id] = this.descr['schemas'][SchemaName]['include'][id];
 
                     Object.assign(subschemas, this.collectListOfSubschemas(subschemas[id]));
@@ -276,7 +285,7 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
 
     /**
      * Analitic function for download schema.
-     * It analyzes availability for download and checks the sources for an element with the same name.
+     * It analyzes result of download and checks the sources for an element with the same name.
      * If there is no element with current name, add the loaded schema to the sources
      * @param {string} SchemaNameName of schema
      * @throws Exception if any error
@@ -313,14 +322,21 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
         };        
         return true;
     }
-
+/**
+ * This function get the row of the descriptor, convert it to JSON  
+ * and passes it to the setter to assign a value to the descriptor and host
+ * @param {object} rowDescriptor 
+ */
     processDescriptorLoad(rowDescriptor) {
         if (this._debugMode) {
             console.log(`We are into processDecriptorLoad and below can see descr`);
             console.log(rowDescriptor.json());           
-        };        
-        this.setDescriptor(rowDescriptor.json());       
-        this.setHost(this.descr["host"]);
+        };
+        if (pm.expect(rowDescriptor).to.have.property('code', 200) &&
+        pm.expect(rowDescriptor).to.have.property('status', 'OK')) {        
+            this.setDescriptor(rowDescriptor.json());       
+            this.setHost(this.descr["host"]);
+        };
         if (this._debugMode) {
             console.log(this.descr);
             console.log(this.host);           
@@ -329,6 +345,7 @@ PMSchemaLoadManager = class PMSchemaLoadManager {
     }
 }
 /**
+ * Set the value of the variable to pass the parameter when initializing the class
  */ 
 let initParamPMSchemaLoadManager = {
     "url":"https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json", 
@@ -338,7 +355,9 @@ let initParamPMSchemaLoadManager = {
         "Authorization":"token 4ac77666d4a0013f7cb791d0319d412a59653db6"
     }
 };
-//*/
+/**
+ * Set the value of the variable to pass the parameter when initializing the class
+ */ 
 //let initParamPMSchemaLoadManager = "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json" 
     
 sl = new PMSchemaLoadManager(initParamPMSchemaLoadManager);

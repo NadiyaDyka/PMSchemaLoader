@@ -1,17 +1,58 @@
 module.exports = class PMSchemaLoadManager {
     descr = {};
+    descriptorRequestParameters = {
+        /**
+         *  URL for descriptor
+         */
+        "url": "",
+        /**
+         *  Method of getting. Default: GET
+         */ 
+        "method": "GET",
+        /**
+         * header for request. Need to be an object
+         */
+        "header": {}      
+    };
+    /**
+     * base url
+     */
     host = "";
+    /**
+     * vriable for change testing mode
+     */
     _debugMode = false;
+
     /**
      * storege for schema sources
      */
     sources = {};
-    descr = require('./dataset.js');
+    //descr = require('./dataset.js');
+    constructor(initParamPMSchemaLoadManager) {
+    
+       if (typeof initParamPMSchemaLoadManager ==="string"){
 
-    constructor(descr, host) {
-        this.descr = descr;
-        this.host = host;
-    }
+           this.descriptorRequestParameters.url = initParamPMSchemaLoadManager;                  
+
+       }else if(typeof initParamPMSchemaLoadManager ==='object'){
+            try {          
+                this.descriptorRequestParameters["url"] = initParamPMSchemaLoadManager["url"];
+                this.descriptorRequestParameters["method"] = initParamPMSchemaLoadManager["method"];
+                this.descriptorRequestParameters["header"] = {};
+                this.descriptorRequestParameters["header"]["Accept"] = initParamPMSchemaLoadManager["header"]["Accept"];                
+                this.descriptorRequestParameters["header"]["Authorization"] = initParamPMSchemaLoadManager["header"]["Authorization"]; 
+                       
+                console.log(this.descriptorRequestParameters); 
+                        
+            }catch (ex) {
+                console.log(`Invalid initParamPMSchemaLoadManager: name: ${ex.name}; message: ${ex.message}`);
+            }
+            
+       }else {
+
+            throw new Error(`Invalid initParamPMSchemaLoadManager. It can be an object or a string`);
+       };                   
+    }     
 
     get debugModeValue() {
         return this._debugMode;
@@ -19,6 +60,25 @@ module.exports = class PMSchemaLoadManager {
     
     set debugModeValue(param) {
         this._debugMode = param;      
+    }
+
+    set descriptorValue(descriptor) {
+        this.descr = descriptor;      
+    }
+
+    getDescriptorRequestParameters(){
+        
+        if (!this.descriptorRequestParameters["method"]){          
+            this.descriptorRequestParameters["method"] = 'GET'; 
+        };
+        if(!this.descriptorRequestParameters["header"]){ 
+         
+            this.descriptorRequestParameters["header"]["Accept"] = "application/vnd.github.VERSION.raw";
+            this.descriptorRequestParameters["header"]["Authorization"] = "token 4ac77666d4a0013f7cb791d0319d412a59653db6";
+        };
+         
+        //console.log(this.descriptorRequestParameters);     
+        return this.descriptorRequestParameters;     
     }
 
     /**
@@ -35,11 +95,11 @@ module.exports = class PMSchemaLoadManager {
             let requestParameters = {};
             let url = this.host + this.descr['schemas'][SchemaName]['path'];
             requestParameters.url = url;
+            requestParameters.method = "GET";
             /**
-             *  the code below (metod and header) need to change to use Postman's constants 
+             *  the code below (header) need to change to use Postman's constants 
              *  or change to transfer header as parameter of class?
-             */
-            requestParameters.method = "GET";           
+             */                       
             requestParameters.header = {};
             requestParameters.header.Accept = 'application/vnd.github.VERSION.raw';      
             requestParameters.header.Authorization = 'token 4ac77666d4a0013f7cb791d0319d412a59653db6'; 
@@ -219,6 +279,19 @@ module.exports = class PMSchemaLoadManager {
             console.log(`Befor the exit of processLoad`);
         }
         
+        return true;
+    }
+
+    processDescriptorLoad(Descr) {
+        if (this._debugMode) {
+            console.log(`We are into processDecriptorLoad and then see DescrJSON`);
+           // console.log(JSON.stringify(Schema.json()));
+            console.log(this.Descr);
+        }; 
+        let DescrJSON=JSON.stringify(Descr.json());
+        if (this._debugMode) {
+            console.log(Key);
+        };            
         return true;
     }
 }

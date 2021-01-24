@@ -1,5 +1,14 @@
-module.exports = class PMSchemaLoadManager {
-    descr = {};
+//module.exports = 
+
+//const Ajv = require('ajv');
+PMSchemaLoadManager = class PMSchemaLoadManager {
+    /**
+     *An object describing the relationships of schemas and subschemas
+     */
+    descr;
+    /**
+     * An object containing the default request parameters for downloading the descriptor
+     */
     descriptorRequestParameters = {
         /**
          *  URL for descriptor
@@ -10,14 +19,14 @@ module.exports = class PMSchemaLoadManager {
          */ 
         "method": "GET",
         /**
-         * header for request. Need to be an object
+         * Header for request. Need to be an object
          */
         "header": {}      
     };
     /**
-     * base url
+     * base url for download schemas
      */
-    host = "";
+    host;
     /**
      * vriable for change testing mode
      */
@@ -29,55 +38,75 @@ module.exports = class PMSchemaLoadManager {
     sources = {};
     //descr = require('./dataset.js');
     constructor(initParamPMSchemaLoadManager) {
-    
+       
        if (typeof initParamPMSchemaLoadManager ==="string"){
 
-           this.descriptorRequestParameters.url = initParamPMSchemaLoadManager;                  
-
+           this.descriptorRequestParameters.url = initParamPMSchemaLoadManager;
+            if (this._debugMode) {                  
+                console.log(`url: ${this.descriptorRequestParameters.url}`);
+            };
        }else if(typeof initParamPMSchemaLoadManager ==='object'){
             try {          
                 this.descriptorRequestParameters["url"] = initParamPMSchemaLoadManager["url"];
                 this.descriptorRequestParameters["method"] = initParamPMSchemaLoadManager["method"];
-                this.descriptorRequestParameters["header"] = {};
-                this.descriptorRequestParameters["header"]["Accept"] = initParamPMSchemaLoadManager["header"]["Accept"];                
-                this.descriptorRequestParameters["header"]["Authorization"] = initParamPMSchemaLoadManager["header"]["Authorization"]; 
-                       
-                console.log(this.descriptorRequestParameters); 
-                        
-            }catch (ex) {
+                /**
+                * as a header, we assume to receive an object containing all the necessary parameters
+                */
+                this.descriptorRequestParameters["header"] = initParamPMSchemaLoadManager["header"];
+                if (this._debugMode) {
+                    console.log(`url: ${this.descriptorRequestParameters["url"]}`);                  
+                    console.log(this.descriptorRequestParameters); 
+                };                         
+                 
+             }catch (ex) {
                 console.log(`Invalid initParamPMSchemaLoadManager: name: ${ex.name}; message: ${ex.message}`);
             }
             
        }else {
 
-            throw new Error(`Invalid initParamPMSchemaLoadManager. It can be an object or a string`);
+            throw new Error(`Invalid initParamPMSchemaLoadManager. It need to be an object or a string`);
        };                   
     }     
 
-    get debugModeValue() {
+    getDebugMode() {
         return this._debugMode;
       }
     
-    set debugModeValue(param) {
-        this._debugMode = param;      
+    setDebugMode(param) {
+        this._debugMode = param; 
+        return true;     
     }
 
-    set descriptorValue(descriptor) {
-        this.descr = descriptor;      
+    getDescriptor() {
+        return this.descr;     
     }
 
-    getDescriptorRequestParameters(){
-        
-        if (!this.descriptorRequestParameters["method"]){          
+    setDescriptor(newDescriptor) {
+        this.descr = newDescriptor;       
+        return true;     
+    }
+    
+    getHost() {
+        return this.host;
+    }
+
+    setHost(newHost) {
+        this.host = newHost;   
+        return true;        
+    }
+
+    getDescriptorRequestParameters(headerForDescriptorRequestParameters){
+       
+        if (this.descriptorRequestParameters["method"] === ""){          
             this.descriptorRequestParameters["method"] = 'GET'; 
         };
-        if(!this.descriptorRequestParameters["header"]){ 
-         
-            this.descriptorRequestParameters["header"]["Accept"] = "application/vnd.github.VERSION.raw";
-            this.descriptorRequestParameters["header"]["Authorization"] = "token 4ac77666d4a0013f7cb791d0319d412a59653db6";
-        };
-         
-        //console.log(this.descriptorRequestParameters);     
+        if ( headerForDescriptorRequestParameters ) {          
+            this.descriptorRequestParameters["header"] = headerForDescriptorRequestParameters;
+        };            
+        if (this._debugMode) {
+            console.log(`descriptorRequestParameters`);
+            console.log(this.descriptorRequestParameters);
+        };      
         return this.descriptorRequestParameters;     
     }
 
@@ -88,26 +117,28 @@ module.exports = class PMSchemaLoadManager {
      * @throws Exception if any error
      * @returns {object} request parameters for get Schema
      */
-    getSchemaRequestParameters(SchemaName) {
-            if (!this.descr['schemas'][SchemaName]['path']) {
-                throw new Error(`Can't find property 'path' in descriptor for ${SchemaName}`)
+
+    getSchemaRequestParameters(SchemaName, headerForSchemaRequestParameters) {
+            if (!this.descr["schemas"][SchemaName]["path"]) {
+                throw new Error(`Can't find property 'path' in descriptor for ${SchemaName}`);
             };
             let requestParameters = {};
-            let url = this.host + this.descr['schemas'][SchemaName]['path'];
+            let url = this.host + this.descr["schemas"][SchemaName]["path"];
             requestParameters.url = url;
             requestParameters.method = "GET";
             /**
              *  the code below (header) need to change to use Postman's constants 
              *  or change to transfer header as parameter of class?
-             */                       
-            requestParameters.header = {};
-            requestParameters.header.Accept = 'application/vnd.github.VERSION.raw';      
-            requestParameters.header.Authorization = 'token 4ac77666d4a0013f7cb791d0319d412a59653db6'; 
+             */ 
+            if ( headerForSchemaRequestParameters ) {                      
+                requestParameters.header = headerForSchemaRequestParameters;
+            };
             if (this._debugMode) {
                 console.log(requestParameters);
             }
             return requestParameters;        
-        }
+    }
+
         /**
          * manages the generating list of schemas to load from host      
          * @param {string} SchemaName
@@ -129,9 +160,13 @@ module.exports = class PMSchemaLoadManager {
         */
 
     * getSchemasToLoadFor(SchemaName, excludeList = {}) {
-        if (!this.descr['schemas'][SchemaName]) {
+         if (this._debugMode) {
+            console.log(`Let read descr`);
+            console.log(this.descr["schemas"]);
+         }; 
+        if (!this.descr["schemas"][SchemaName]) {
             throw new Error(`Can't find the schema ${SchemaName} in descriptor.`)
-        }
+        };
         if (this._debugMode) {
             console.log(`Let me see current item of the source and then object sources`);
             console.log(this.sources[SchemaName]); 
@@ -140,21 +175,20 @@ module.exports = class PMSchemaLoadManager {
         if (!this.sources[SchemaName] &&
             !excludeList[SchemaName]) {              
             yield SchemaName;
-            excludeList[SchemaName] = true;            
-           
-        }
+            excludeList[SchemaName] = true;           
+        };
 
-        if (this.descr['schemas'][SchemaName]['include']) {
+        if (this.descr["schemas"][SchemaName]["include"]) {
 
-            if (typeof(this.descr['schemas'][SchemaName]['include']) == "object") {
+            if (typeof(this.descr["schemas"][SchemaName]["include"]) == "object") {
 
-                for (let id in this.descr['schemas'][SchemaName]['include']) {
+                for (let id in this.descr["schemas"][SchemaName]["include"]) {
 
-                    let subschema = this.descr['schemas'][SchemaName]['include'][id];
+                    let subschema = this.descr["schemas"][SchemaName]["include"][id];
                     yield* this.getSchemasToLoadFor(subschema, excludeList);
                 }
             }
-        }
+        };
     }
 
     /**
@@ -169,13 +203,12 @@ module.exports = class PMSchemaLoadManager {
         if (this._debugMode) {
             console.log("The `sources` can see below:");       
             console.log(this.sources);
+            console.log(`getSchema: befor new Ajv`);
         }
         // Because Promises in Postman are still buggy (see https://community.postman.com/t/using-native-javascript-promises-in-postman/636/11)
         // We have no other way as use own waiting function.
         // this.waitForLoad(SchemaName, subschemas);
-        if (this._debugMode) {
-            console.log(`getSchema: befor new Ajv`);
-        };
+       
         let ajv = new Ajv({ logger: console, allErrors: true, verbose: true });
         if (this._debugMode) {
           console.log(`getSchema: after new Ajv`);
@@ -235,7 +268,7 @@ module.exports = class PMSchemaLoadManager {
             }
         }
         if (this._debugMode) {
-            console.log("subschemas ниже");  
+            console.log("See subschemas below");  
             console.log(subschemas);
         };
         return subschemas;
@@ -257,6 +290,7 @@ module.exports = class PMSchemaLoadManager {
             console.log(this.sources[Schema]);
         }; 
         let SchemaJSON=JSON.stringify(Schema.json());
+        //let SchemaJSON=Schema.json();
         if (this._debugMode) {
             console.log(Key);
         };    
@@ -267,13 +301,13 @@ module.exports = class PMSchemaLoadManager {
             //here i need to check that sendRequest return resolve result (not error)
             // if sendRequest return result than res=this.sources[SchemaName]
 
-            /* if (pm.expect(Schema).to.have.property('code', 200) &&
+             if (pm.expect(Schema).to.have.property('code', 200) &&
                 pm.expect(Schema).to.have.property('status', 'OK')) {
                 this.sources[Key] = SchemaJSON;
                 if (this._debugMode) {
                  console.log(this.sources[Schema]);
                 }
-            }            */ 
+            }            
         }
         if (this._debugMode) {
             console.log(`Befor the exit of processLoad`);
@@ -282,16 +316,34 @@ module.exports = class PMSchemaLoadManager {
         return true;
     }
 
-    processDescriptorLoad(Descr) {
+    processDescriptorLoad(rowDescriptor) {
         if (this._debugMode) {
-            console.log(`We are into processDecriptorLoad and then see DescrJSON`);
-           // console.log(JSON.stringify(Schema.json()));
-            console.log(this.Descr);
+            console.log(`We are into processDecriptorLoad and below can see descr`);
+            console.log(rowDescriptor.json());           
         }; 
-        let DescrJSON=JSON.stringify(Descr.json());
+        //let DescrJSON=JSON.stringify(rowDescriptor.json());
+        //this.descr = rowDescriptor.json();
+        //this.host = this.descr["host"];
+        this.setDescriptor(rowDescriptor.json());       
+        this.setHost(this.descr["host"]);
         if (this._debugMode) {
-            console.log(Key);
-        };            
+            console.log(this.descr);
+            console.log(this.host);           
+        };                     
         return true;
     }
 }
+/**
+ */ 
+let initParamPMSchemaLoadManager = {
+    "url":"https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json", 
+    "method":"GET", 
+    "header":{
+        "Accept":"application/vnd.github.VERSION.raw",
+        "Authorization":"token 4ac77666d4a0013f7cb791d0319d412a59653db6"
+    }
+};
+//*/
+//let initParamPMSchemaLoadManager = "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json" 
+    
+sl = new PMSchemaLoadManager(initParamPMSchemaLoadManager);

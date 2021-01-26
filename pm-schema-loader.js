@@ -1,11 +1,29 @@
 //module.exports = 
 
 /**
- * 
+ * class that manages the loading of the descriptor, json-schemas, subschemas 
+ * and transferring the schemas to the AJV-library
  */
 class PMSchemaLoadManager {
     /**
-     *An object describing the relationships of schemas and subschemas
+     *An object describing the relationships of schemas and subschemas.
+     *It should have the following structure:
+     *{
+     *"host": "https:// host address",
+     *"schemas": {
+     *
+     *  "schema1": {
+     *      "title": "Description of schema1",
+     *      "path": "/path to/schema1.json",           
+     *      "include": { "schema1_id1": "subschema1", "schema1_id2": "subschema", "schema1_id3": "subschema3"}
+     *  },
+     *
+     *  "subschema1": {
+     *      "path": "/path to/subschema1.json"           
+     *  },
+     * .......
+     * }  
+     * "include" object consists of pairs: (unique identifier of the subschema, the name of the subschema in the descriptor)
      */
     descr;
     /**
@@ -42,7 +60,7 @@ class PMSchemaLoadManager {
     /**
      * The constructor processes an object - a complete set of parameters for a request
      * or a string - a path for downloading a descriptor (for the simplest case, when link enought for download)
-     * @param {object or string} initParamPMSchemaLoadManager 
+     * @param {object|string} initParamPMSchemaLoadManager 
      */
     constructor(initParamPMSchemaLoadManager) {
        
@@ -92,7 +110,8 @@ class PMSchemaLoadManager {
     }
 
     setDescriptor(newDescriptor) {
-        this.descr = newDescriptor;       
+        this.descr = newDescriptor; 
+        this.host = this.descr["host"];      
         return true;     
     }
     
@@ -127,6 +146,8 @@ class PMSchemaLoadManager {
      * Function composes a string with the url and
      * than create object with request parameters 
      * @param {string} SchemaName Name of Schema
+     * @param {object} headerForSchemaRequestParameters (optional) header for SchemaRequestParameters 
+     * If the parameter is passed, the request will be sent with this header
      * @throws Exception if any error
      * @returns {object} request parameters for get Schema
      */
@@ -152,6 +173,8 @@ class PMSchemaLoadManager {
     /**
      * manages the generating list of schemas to load from host      
      * @param {string} SchemaName
+     * @param {object} excludeList (optional). If passed object has some items
+     * function do not return yield when get any of this items
      * @throws Exception if any error
      * @returns {object}
      *
@@ -160,10 +183,10 @@ class PMSchemaLoadManager {
      *A client with this function can work like this:
      *async function(){
      *  try {
-     *    foreach( var scheme in GSM.getSchemasToLoadFor(SchemaName) ) { // *1
-     *      GSM.processLoad( await sendRequest( GSM.getSchemaRequestParameters(scheme) ) );
+     *    foreach( var scheme in PMSchemaLoadManager.getSchemasToLoadFor(SchemaName) ) { // *1
+     *     PMSchemaLoadManager.processLoad( await sendRequest( PMSchemaLoadManager.getSchemaRequestParameters(scheme) ) );
      *    }
-     *   ajv = GSM.getAJV( SchemaName );
+     *   ajv = PMSchemaLoadManager.getAJV( SchemaName );
      *  }
      * catch(...){
      * 

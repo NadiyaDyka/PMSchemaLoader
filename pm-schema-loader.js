@@ -1,29 +1,36 @@
 //module.exports = 
 
 /**
- * class that manages the loading of the descriptor, json-schemas, subschemas 
- * and transferring the schemas to the AJV-library
+ * class manages the loading of the descriptor, json-schemas, subschemas 
+ * and transferring the schemas to the AJV-library for compose and compile schemas
  */
 class PMSchemaLoadManager {
     /**
-     *An object describing the relationships of schemas and subschemas.
-     *It should have the following structure:
+     *Descr is an associative array describing the relationships of schemas and subschemas.
+     *It should have the following proporties:
      *{
      *"host": "https:// host address",
      *"schemas": {
      *
      *  "schema1": {
      *      "title": "Description of schema1",
-     *      "path": "/path to/schema1.json",           
-     *      "include": { "schema1_id1": "subschema1", "schema1_id2": "subschema", "schema1_id3": "subschema3"}
+     *      "path": "/path to/schema1.json",  
+     *          
+     *  "include" is associative array where pair consist from unique identifier
+     *   of the subschema and the name of the subschema in the descriptor. 
+     *   This unique identifier need for transfer as a second parameter for command ajv.addSchema. 
+     *   If  this parameter not passing, schema should have unique identifier build into it.
+     * 
+     *      "include": { "schema1_id1": "subschema1", "schema1_id2": "subschema2", "schema1_id3": "subschema3"} 
      *  },
      *
      *  "subschema1": {
      *      "path": "/path to/subschema1.json"           
      *  },
      * .......
-     * }  
-     * "include" object consists of pairs: {"unique identifier of the subschema" : "the name of the subschema in the descriptor"}
+     * }
+     *   
+     
      */
     descr;
     /**
@@ -153,7 +160,7 @@ class PMSchemaLoadManager {
      * If the parameter is passed, the request will be sent with this header
      * If the parameter is not passed, the request will be sent without header
      * @throws Exception if any error
-     * @returns {object} request parameters for get Schema
+     * @returns {object} requestParameters request parameters for get Schema
      */
     getSchemaRequestParameters(SchemaName, headerForSchemaRequestParameters) {
             if (!this.descr["schemas"][SchemaName]["path"]) {
@@ -234,7 +241,7 @@ class PMSchemaLoadManager {
      * creates an instance of the library and passes it a list of subschemas with id 
      * @param {string} SchemaName
      * @throws Exception if any error
-     * @returns {object} validate
+     * @returns {object} schemaValidator
      * 
      */
     addSchemaToAjv(SchemaName, sources) {
@@ -257,12 +264,9 @@ class PMSchemaLoadManager {
             if (this._debugMode) {
                 console.log(`Add subschema to ajv: ${subSchemaName}`);
                 console.log(this.sources[subSchemaName]);
+                console.log(`key ${key}`); 
             };            
-            ajv.addSchema(this.sources[subSchemaName], key);
-            if (this._debugMode) {
-                console.log(`key ${key}`);              
-                console.log(this.sources[SchemaName]);
-            };
+            ajv.addSchema(this.sources[subSchemaName], key);            
         };
         try {       
             const schemaValidator = ajv.compile(this.sources[SchemaName]);
@@ -272,20 +276,18 @@ class PMSchemaLoadManager {
             return schemaValidator;
         } catch (e) {
             console.log(e.message);
-        };
-       
+        };       
     }
 
-    /**
-     * manages the loading of the main schema and subschemas, 
-     * generates a list of subschemas
+    /**  
      * @param {string} SchemaName
      * @throws Exception if any error
      * @returns {object}
-     * 
+     * This function reads the descriptor and compiles a list of subschemas
+     * that are part of the schema "SchemaName" passed in the parameter
      */
     collectListOfSubschemas(SchemaName) {
-        if (!this.descr['schemas'][SchemaName]) {
+        if (!this.descr['schemas'][SchemaName]) {            
             throw new Error(`Can't find the schema ${SchemaName} in descriptor.`)
         }
         var subschemas = {};
@@ -324,8 +326,7 @@ class PMSchemaLoadManager {
             console.log(`We are into processLoad and then see SchemaJSON`);
             console.log(Schema.json());
             console.log(this.sources[Schema]);
-        }; 
-       
+        };        
         let SchemaJSON=Schema.json();
         if (this._debugMode) {
             console.log(Key);
@@ -353,7 +354,8 @@ class PMSchemaLoadManager {
 /**
  * This function get the row of the descriptor, convert it to JSON  
  * and passes it to the setter to assign a value to the descriptor and host
- * @param {object} rowDescriptor 
+ * @param {object} rowDescriptor response to request
+ * @returns {boolean} Success flag
  */
     processDescriptorLoad(rowDescriptor) {
         if (this._debugMode) {
@@ -388,7 +390,7 @@ let initParamPMSchemaLoadManager = {
  */ 
 //let initParamPMSchemaLoadManager = "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json" 
  /**
-  * initialize the class as SingleTone
-  * to save all downloaded schemes in it and not download them again
-  *  */   
+  * initialize the class as SingleTone to save all downloaded schemes in it
+  * and not download them again if they are part of other schemas 
+  */   
 sl = new PMSchemaLoadManager(initParamPMSchemaLoadManager);

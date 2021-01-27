@@ -23,7 +23,7 @@ class PMSchemaLoadManager {
      *  },
      * .......
      * }  
-     * "include" object consists of pairs: (unique identifier of the subschema, the name of the subschema in the descriptor)
+     * "include" object consists of pairs: {"unique identifier of the subschema" : "the name of the subschema in the descriptor"}
      */
     descr;
     /**
@@ -44,7 +44,7 @@ class PMSchemaLoadManager {
         "header": {}      
     };
     /**
-     * base url for download schemas
+     * url for downloading schemas
      */
     host;
     /**
@@ -126,6 +126,9 @@ class PMSchemaLoadManager {
     /**
      *This function composes request parameters for downloading the descriptor 
     * @param {object} headerForDescriptorRequestParameters 
+    * If during the initialization of the class the object including the header 
+    * was not passed, then the header can be passed through this parameter. 
+    * If the header was passed, it will be replaced with the value from this parameter.
     */
     getDescriptorRequestParameters(headerForDescriptorRequestParameters){
        
@@ -148,10 +151,10 @@ class PMSchemaLoadManager {
      * @param {string} SchemaName Name of Schema
      * @param {object} headerForSchemaRequestParameters (optional) header for SchemaRequestParameters 
      * If the parameter is passed, the request will be sent with this header
+     * If the parameter is not passed, the request will be sent without header
      * @throws Exception if any error
      * @returns {object} request parameters for get Schema
      */
-
     getSchemaRequestParameters(SchemaName, headerForSchemaRequestParameters) {
             if (!this.descr["schemas"][SchemaName]["path"]) {
                 throw new Error(`Can't find property 'path' in descriptor for ${SchemaName}`);
@@ -173,8 +176,10 @@ class PMSchemaLoadManager {
     /**
      * manages the generating list of schemas to load from host      
      * @param {string} SchemaName
-     * @param {object} excludeList (optional). If passed object has some items
-     * function do not return yield when get any of this items
+     * @param {object} excludeList (optional). This parameter is an associative array. 
+     * The default is an empty array.
+     * If passed assoc.array has some items than
+     * function do not return yield when get anyone of this items.
      * @throws Exception if any error
      * @returns {object}
      *

@@ -19,7 +19,7 @@ class PMSchemaLoadManager {
      *  "include" is associative array where pair consist from unique identifier
      *   of the subschema and the name of the subschema in the descriptor. 
      *   This unique identifier need for transfer as a second parameter for command ajv.addSchema. 
-     *   If  this parameter not passing, schema should have unique identifier build into it.
+     *   If this parameter not passing, schema should have unique identifier build into it.
      * 
      *      "include": { "schema1_id1": "subschema1", "schema1_id2": "subschema2", "schema1_id3": "subschema3"} 
      *  },
@@ -34,7 +34,8 @@ class PMSchemaLoadManager {
      */
     descr;
     /**
-     * An object containing the default request parameters for downloading the descriptor
+     * descriptorRequestParameters is an object containing the request parameters for downloading the descriptor.
+     * Here we assign default parameters
      */
     descriptorRequestParameters = {
         /**
@@ -65,7 +66,7 @@ class PMSchemaLoadManager {
      */
     sources = {};
     /**
-     * The constructor processes an object - a complete set of parameters for a request
+     * The constructor processes an associative array - a complete set of parameters for a request
      * or a string - a path for downloading a descriptor (for the simplest case, when link enought for download)
      * @param {object|string} initParamPMSchemaLoadManager 
      */
@@ -115,6 +116,11 @@ class PMSchemaLoadManager {
     getDescriptor() {
         return this.descr;     
     }
+
+    /**
+     * @param {object} newDescriptor 
+     * set value for descr and host
+     */
 
     setDescriptor(newDescriptor) {
         this.descr = newDescriptor; 
@@ -181,7 +187,7 @@ class PMSchemaLoadManager {
     }
 
     /**
-     * manages the generating list of schemas to load from host      
+     * Manages the generating list of schemas to load from host.      
      * @param {string} SchemaName
      * @param {object} excludeList (optional). This parameter is an associative array. 
      * The default is an empty array.
@@ -238,7 +244,7 @@ class PMSchemaLoadManager {
     }
 
     /**
-     * creates an instance of the library and passes it a list of subschemas with id 
+     * Creates an instance of the library AJV and passes it a list of subschemas with id 
      * @param {string} SchemaName
      * @throws Exception if any error
      * @returns {object} schemaValidator

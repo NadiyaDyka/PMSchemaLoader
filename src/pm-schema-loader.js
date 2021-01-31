@@ -1,12 +1,10 @@
-//module.exports = 
-
 /**
  * class manages the loading of the descriptor, json-schemas, subschemas 
  * and transferring the schemas to the AJV-library for compose and compile schemas
  */
 class PMSchemaLoadManager {
     /**
-     *Descr is an associative array describing the relationships of schemas and subschemas.
+     *descr is an associative array describing the relationships of schemas and subschemas.
      *It should have the following proporties:
      *{
      *"host": "https:// host address",
@@ -121,7 +119,6 @@ class PMSchemaLoadManager {
      * @param {object} newDescriptor 
      * set value for descr and host
      */
-
     setDescriptor(newDescriptor) {
         this.descr = newDescriptor; 
         this.host = this.descr["host"];      
@@ -195,22 +192,9 @@ class PMSchemaLoadManager {
      * function do not return yield when get anyone of this items.
      * @throws Exception if any error
      * @returns {object}
-     *
-     *This is a generator function. It does not form the array in advance, but
-     *transfers control to the outside as soon as it receives the first element.
-     *A client with this function can work like this:
-     *async function(){
-     *  try {
-     *    foreach( var scheme in PMSchemaLoadManager.getSchemasToLoadFor(SchemaName) ) { // *1
-     *     PMSchemaLoadManager.processLoad( await sendRequest( PMSchemaLoadManager.getSchemaRequestParameters(scheme) ) );
-     *    }
-     *   ajv = PMSchemaLoadManager.getAJV( SchemaName );
-     *  }
-     * catch(...){
-     * 
-     * }();
+     * This is a generator function. It does not form the array in advance, but
+     * transfers control to the outside as soon as it receives the first element.
      */
-
     * getSchemasToLoadFor(SchemaName, excludeList = {}) {
          if (this._debugMode) {
             console.log(`Let read descr`);
@@ -256,11 +240,7 @@ class PMSchemaLoadManager {
             console.log("The `sources` can see below:");       
             console.log(this.sources);
             console.log(`getSchema: befor new Ajv`);
-        }
-        // Because Promises in Postman are still buggy (see https://community.postman.com/t/using-native-javascript-promises-in-postman/636/11)
-        // We have no other way as use own waiting function.
-        // this.waitForLoad(SchemaName, subschemas);
-       
+        }        
         let ajv = new Ajv({ logger: console, allErrors: true, verbose: true });
         if (this._debugMode) {
           console.log(`getSchema: after new Ajv`);
@@ -383,7 +363,7 @@ class PMSchemaLoadManager {
 /**
  * Set the value of the variable to pass the parameter when initializing the class
  */ 
-let initParamPMSchemaLoadManager = {
+let initParamPMSchemaLoadManager = {   //param as object
     "url":"https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json", 
     "method":"GET", 
     "header":{
@@ -391,10 +371,7 @@ let initParamPMSchemaLoadManager = {
         "Authorization":"token 4ac77666d4a0013f7cb791d0319d412a59653db6"
     }
 };
-/**
- * Set the value of the variable to pass the parameter when initializing the class
- */ 
-//let initParamPMSchemaLoadManager = "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json" 
+//let initParamPMSchemaLoadManager = "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json"  // param as string
  /**
   * initialize the class as SingleTone to save all downloaded schemes in it
   * and not download them again if they are part of other schemas 

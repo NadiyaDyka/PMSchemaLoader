@@ -1,16 +1,14 @@
-const _dummy = setInterval(() => { }, 300000);
-Ajv = require('ajv');
 /** 
  *importent information how Postman SandBox can work with asinc/await
  * https://community.postman.com/executing-sync-requests-programmatically-from-a-pre-request-or-test-scripts/14678
- * Main idea: download from GitHub JSON-schemas and subschemas
- * (if we haven't got them in sources yet) and when we get all needs schemas,
- * transfer them (add) into library ajv for compilation, then all information will storege in class 
- * To realize this idea we created js-class that managed schemas downloading.
+ *  If we use a dummy Interval object, we can use async/await to have a cleaner method of chaining asynchronous calls.
  */
+const _dummy = setInterval(() => { }, 300000); //This line is required for asynchronous functions to work
+Ajv = require('ajv'); 
 /**
  * External Function download schema used Request Parameters
- * (It doesn't analyzes anything)
+ * This function must be defined in the same window where it will be called. 
+ * Otherwise it won't work
  * @param {string} url Url of schema
  * @throws Exception if any error
  * @returns {object} Schema Request Parameters
@@ -27,20 +25,18 @@ function sendRequest(req) {
         //setTimeout(() => resolve("done"), 1000);
     });
 }
-
+/**
+ * wrapper function needed to handle the Promise
+ */
 async function wrapper() {
     sl.setDebugMode(true);
-    /* try {
-        sl.processDescriptorLoad(await sendRequest(sl.getDescriptorRequestParameters(headerRP)));             
-             
-         console.log( sl.descr);
-        
+     try { // downloading descr
+        sl.processDescriptorLoad(await sendRequest(sl.getDescriptorRequestParameters(headerRP)));                          
+         console.log( sl.descr);        
     } catch (ex) {
         console.log(`Can't got descriptor: name: ${ex.name}; message: ${ex.message}`); 
          clearInterval(_dummy)    
-    }; */
-    //sl.setDebugMode(false);
-    sl.setDescriptor(descr1);
+    }; 
     if (sl.getDebugMode) {
         console.log("This new descriptor");
         console.log(sl.getDescriptor());
@@ -48,8 +44,8 @@ async function wrapper() {
     try {
         for (var schema of sl.getSchemasToLoadFor("get_lang_schema")) {
             console.log(`The generator has identified the schema name ${schema}`);
+            //downloading schemas
             sl.processLoad(schema, await sendRequest(sl.getSchemaRequestParameters(schema, headerRP)));
-
         }
         ajv = sl.addSchemaToAjv("get_lang_schema");
         clearInterval(_dummy)
@@ -58,28 +54,19 @@ async function wrapper() {
         clearInterval(_dummy)
     }
 }
-
-
-/**let initParamPMSchemaLoadManager = {
-    "url":"https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json", 
-    "method":"GET", 
-    "header":{
-        "Accept":"application/vnd.github.VERSION.raw",
-        "Authorization":"token 4ac77666d4a0013f7cb791d0319d412a59653db6"
-    }
-};
-
-const sl = new PMSchemaLoadManager(initParamPMSchemaLoadManager);
-*/
+/** parameters for the request header
+ * descr download function and schema download function - can take request headers as a parameter
+ */
 const headerRP = {
     "Accept": "application/vnd.github.VERSION.raw",
     "Authorization": "token 4ac77666d4a0013f7cb791d0319d412a59653db6"
 };
-const descr1 = {
+//The setDescriptor(descr)function makes it possible to pass a descriptor through a variable without downloading
+/*const descr = {
     "host": "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents",
     "schemas": {
 
-        "get_lang_schema1": {
+        "get_lang_schema": {
             "title": "Schema for GET language response",
             "path": "/schemas/get_lang_schema.json",
             "include": { main: "common_lib", reserve: "common_lib", glsData: "data_lib" }
@@ -98,7 +85,5 @@ const descr1 = {
 
     }
 };
-//*/
-
-
+*/
 wrapper();

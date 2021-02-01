@@ -59,7 +59,7 @@ async function wrapper() {
  */
 const headerRP = {
     "Accept": "application/vnd.github.VERSION.raw",
-    "Authorization": "token 4ac77666d4a0013f7cb791d0319d412a59653db6"
+    "Authorization": "token "
 };
 //The setDescriptor(descr)function makes it possible to pass a descriptor through a variable without downloading
 /*const descr = {

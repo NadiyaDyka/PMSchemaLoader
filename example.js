@@ -7,22 +7,21 @@ const _dummy = setInterval(() => { }, 300000); //This line is required for async
 Ajv = require('ajv'); 
 /**
  * External Function download schema used Request Parameters
- * This function must be defined in the same window where it will be called. 
+ * This function must be defined on top level of the window where it will be called. 
  * Otherwise it won't work
  * @param {string} url Url of schema
  * @throws Exception if any error
  * @returns {object} Schema Request Parameters
+ * 
  */
 function sendRequest(req) {
     return new Promise((resolve, reject) => {
         pm.sendRequest(req, (err, res) => {
             if (err) {
-                throw new Error(`Can't download item ${err}`);
-                //return reject(err);
+                throw new Error(`Can't download item ${err}`);               
             }
             return resolve(res);
-        })
-        //setTimeout(() => resolve("done"), 1000);
+        })        
     });
 }
 /**
@@ -31,7 +30,7 @@ function sendRequest(req) {
 async function wrapper() {
     sl.setDebugMode(true);
      try { // downloading descr
-        sl.processDescriptorLoad(await sendRequest(sl.getDescriptorRequestParameters(headerRP)));                          
+        sl.processDescriptorLoad(await sendRequest(sl.getDescriptorRequestParameters(headerRPD)));                          
          console.log( sl.descr);        
     } catch (ex) {
         console.log(`Can't got descriptor: name: ${ex.name}; message: ${ex.message}`); 
@@ -42,12 +41,12 @@ async function wrapper() {
         console.log(sl.getDescriptor());
     };
     try {
-        for (var schema of sl.getSchemasToLoadFor("get_lang_schema")) {
+        for (var schema of sl.getSchemasToLoadFor(schemaName)) {
             console.log(`The generator has identified the schema name ${schema}`);
             //downloading schemas
             sl.processLoad(schema, await sendRequest(sl.getSchemaRequestParameters(schema, headerRP)));
         }
-        ajv = sl.addSchemaToAjv("get_lang_schema");
+        ajv = sl.addSchemaToAjv(schemaName);
         clearInterval(_dummy)
     } catch (ex) {
         console.log(`Fail: name: ${ex.name}; message: ${ex.message}`);
@@ -57,13 +56,14 @@ async function wrapper() {
 /** parameters for the request header
  * descr download function and schema download function - can take request headers as a parameter
  */
-const headerRP = {
+const headerRPD = {
     "Accept": "application/vnd.github.VERSION.raw",
-    "Authorization": "token "
+    "Authorization": "token ... "
 };
-//The setDescriptor(descr)function makes it possible to pass a descriptor through a variable without downloading
-/*const descr = {
-    "host": "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents",
+//The setDescriptor(descr) function makes it possible to pass a descriptor through a variable without downloading
+/*
+const descr = {
+    "host": "https://api.github.com/repos/.../.../contents",
     "schemas": {
 
         "get_lang_schema": {
@@ -71,7 +71,6 @@ const headerRP = {
             "path": "/schemas/get_lang_schema.json",
             "include": { main: "common_lib", reserve: "common_lib", glsData: "data_lib" }
         },
-
         "common_lib": {
             "path": "/schemas/common_lib.json",
             "include": { metaId: "meta_lib", dataID: "data_lib" }
@@ -82,7 +81,6 @@ const headerRP = {
         "meta_lib": {
             "path": "/schemas/meta_lib.json"
         }
-
     }
 };
 */

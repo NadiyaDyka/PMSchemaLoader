@@ -17,10 +17,10 @@ It is easy to keep the schemes up to date by downloading only the scheme and its
 
 descr is an associative array describing the relationships of schemas and subschemas.
 It should have the following properties:
+
      {
      "host": "https:// host address",
-     "schemas": {
-     
+     "schemas": {     
        "schema1": {
            "title": "Description of schema1",
            "path": "/path to/schema1.json",             

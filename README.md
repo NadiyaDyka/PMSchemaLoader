@@ -1,7 +1,7 @@
 # PMSchemaLoader
 Postman JSON Schema Loader
 
-The class downloads JSON schemas from GitHub (or another source) to Postman and transfers them to the AJV library. It verifies that the server response matches the JSON schema. Schemes may change often that's why convenient to store them on GitHub.
+The class downloads JSON schemas from GitHub (or another source) to Postman and transfers them to the AJV library. It verifies that the server response matches the JSON schema. 
 The relationship of schemas is described by a descriptor descr (see example below). When downloading a schema, only the subschemas it needs are downloaded.
 
 To use PMSchemaLoader you need

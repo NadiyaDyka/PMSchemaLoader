@@ -35,5 +35,4 @@ It should have the following properties:
  "include" is associative array where pair consist from unique identifier
            of the subschema and of the name of the subschema in the descriptor. 
            This unique identifier need for transfer as a second parameter for command ajv.addSchema. 
-           If this parameter not passing, schema should have unique identifier build into it.
-
+           

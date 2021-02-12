@@ -368,7 +368,7 @@ let initParamPMSchemaLoadManager = {   //param as object
     "method":"GET", 
     "header":{
         "Accept":"application/vnd.github.VERSION.raw",
-        "Authorization":"token 4ac77666d4a0013f7cb791d0319d412a59653db6"
+        "Authorization":"token "
     }
 };
 //let initParamPMSchemaLoadManager = "https://api.github.com/repos/NadiyaDyka/AffRegAPIDoc/contents/schemas/descriptor.json"  // param as string

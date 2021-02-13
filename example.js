@@ -41,12 +41,12 @@ async function wrapper() {
         console.log(sl.getDescriptor());
     };
     try {
-        for (var schema of sl.getSchemasToLoadFor(schemaName)) {
+        for (var schema of sl.getSchemasToLoadFor("get_lang_schema")) {
             console.log(`The generator has identified the schema name ${schema}`);
             //downloading schemas
             sl.processLoad(schema, await sendRequest(sl.getSchemaRequestParameters(schema, headerRP)));
         }
-        ajv = sl.addSchemaToAjv(schemaName);
+        ajv = sl.addSchemaToAjv("get_lang_schema");
         clearInterval(_dummy)
     } catch (ex) {
         console.log(`Fail: name: ${ex.name}; message: ${ex.message}`);
